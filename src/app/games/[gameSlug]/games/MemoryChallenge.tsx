@@ -5,37 +5,54 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lightbulb, TriangleAlert } from 'lucide-react';
+import { Lightbulb, TriangleAlert, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { generateMemoryChallenge, type MemoryChallengeOutput } from '@/ai/flows/generate-memory-challenge-flow';
 
 interface ReportItem {
   item: string;
   value: string;
 }
 
-const generateReport = (): ReportItem[] => {
-  const items = ["Q3 Sales", "New Leads", "Marketing ROI", "Customer Churn", "Top Performing Region", "Project Alpha Budget"];
-  const values = ["$2.1M", "4,280", "15.2%", "1.8%", "North-East", "$250,000"];
-  const shuffledItems = items.sort(() => 0.5 - Math.random());
-  return shuffledItems.slice(0, 5).map((item, i) => ({ item, value: values[items.indexOf(item)] }));
-};
-
-const VIEW_TIME = 15; // Increased to 15 seconds to view the report
+const VIEW_TIME = 15;
 
 export function MemoryChallenge({ onGameComplete }: { onGameComplete: (score: number) => void }) {
+  const [challenge, setChallenge] = useState<MemoryChallengeOutput | null>(null);
   const [gameState, setGameState] = useState<'viewing' | 'answering' | 'result'>('viewing');
   const [timeLeft, setTimeLeft] = useState(VIEW_TIME);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const report = useMemo(generateReport, []);
-  const questionIndex = useMemo(() => Math.floor(Math.random() * report.length), [report]);
-  const questionItem = report[questionIndex];
+  useEffect(() => {
+    async function loadChallenge() {
+      try {
+        setIsLoading(true);
+        const newChallenge = await generateMemoryChallenge();
+        setChallenge(newChallenge);
+      } catch (e) {
+        setError('Failed to load a new memory challenge. Please try refreshing.');
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadChallenge();
+  }, []);
+
+  const { report, questionItem } = useMemo(() => {
+    if (!challenge) return { report: [], questionItem: undefined };
+    const report = challenge.report;
+    const questionIndex = Math.floor(Math.random() * report.length);
+    return { report, questionItem: report[questionIndex] };
+  }, [challenge]);
 
   const progress = (timeLeft / VIEW_TIME) * 100;
 
   useEffect(() => {
-    if (gameState !== 'viewing') return;
+    if (gameState !== 'viewing' || isLoading) return;
 
     if (timeLeft <= 0) {
       setGameState('answering');
@@ -47,11 +64,11 @@ export function MemoryChallenge({ onGameComplete }: { onGameComplete: (score: nu
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [timeLeft, gameState]);
+  }, [timeLeft, gameState, isLoading]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (feedback) return;
+    if (feedback || !questionItem) return;
     const isCorrect = answer.trim().toLowerCase() === questionItem.value.toLowerCase();
 
     if (isCorrect) {
@@ -63,11 +80,44 @@ export function MemoryChallenge({ onGameComplete }: { onGameComplete: (score: nu
     }
   };
 
+  if (isLoading) {
+    return (
+        <div className="space-y-6 text-center">
+            <h3 className="text-xl font-headline font-semibold">Memory & Focus Challenge</h3>
+            <Card className="shadow-lg">
+                <CardHeader>
+                    <Skeleton className="h-8 w-1/2 mx-auto" />
+                    <Skeleton className="h-4 w-3/4 mx-auto mt-2" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                    <div className="flex justify-center items-center pt-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <p className="ml-4 text-muted-foreground">Fetching secure data...</p>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
+  }
+
+  if (error || !challenge || !questionItem) {
+    return (
+        <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error || 'An unexpected error occurred.'}</AlertDescription>
+        </Alert>
+    );
+  }
+
   return (
     <div className="space-y-6 text-center">
-      <h3 className="text-xl font-headline font-semibold">Memory & Focus Challenge</h3>
+      <h3 className="text-xl font-headline font-semibold animate-fade-in-up">Memory & Focus Challenge</h3>
       {gameState === 'viewing' && (
-        <Card className="shadow-lg animate-in fade-in-0">
+        <Card className="shadow-lg animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           <CardHeader>
             <CardTitle>Memorize the Report</CardTitle>
             <CardDescription>You have {VIEW_TIME} seconds to memorize these key metrics.</CardDescription>
@@ -90,7 +140,7 @@ export function MemoryChallenge({ onGameComplete }: { onGameComplete: (score: nu
       )}
 
       {gameState === 'answering' && (
-        <Card className="shadow-lg animate-in fade-in-0">
+        <Card className="shadow-lg animate-in fade-in-0 slide-in-from-bottom-4">
           <CardHeader>
              <CardTitle>Recall Test</CardTitle>
           </CardHeader>

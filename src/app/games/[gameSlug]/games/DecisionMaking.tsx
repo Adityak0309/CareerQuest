@@ -5,52 +5,48 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { Clock } from 'lucide-react';
+import { Clock, Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { generateDilemma, type DilemmaOutput } from '@/ai/flows/generate-dilemma-flow';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-interface Dilemma {
-  scenario: string;
-  optionA: { text: string; score: number };
-  optionB: { text: string; score: number };
-  justification: string;
-}
-
-const dilemmas: Dilemma[] = [
-  {
-    scenario: "Your team can deliver a client project today with 60% accuracy, or in 3 days with 95% accuracy. The client is demanding a quick turnaround but also expects high quality.",
-    optionA: { text: "Deliver today (60% accuracy)", score: 40 },
-    optionB: { text: "Deliver in 3 days (95% accuracy)", score: 80 },
-    justification: "Prioritizing quality over speed often leads to better long-term client relationships, though sometimes quick delivery is a strategic necessity."
-  },
-  {
-    scenario: "You can allocate your marketing budget to a reliable, low-return campaign (guaranteed 2% ROI) or a high-risk, high-return experimental campaign (potential 20% ROI, but 50% chance of failure).",
-    optionA: { text: "Low-risk, low-return", score: 60 },
-    optionB: { text: "High-risk, high-return", score: 75 },
-    justification: "Calculated risks are often necessary for growth. The potential upside can outweigh the risk of failure in many business contexts."
-  },
-  {
-    scenario: "A key employee requests a significant raise that is outside the budget. Refusing might cause them to leave, but accepting will strain finances and require cuts elsewhere.",
-    optionA: { text: "Grant the raise and make cuts", score: 85 },
-    optionB: { text: "Refuse the raise and risk departure", score: 45 },
-    justification: "Retaining top talent is often more cost-effective than hiring and training a replacement, even if it requires difficult short-term financial adjustments."
-  }
-];
-
-const TIME_LIMIT = 20; // Increased to 20 seconds per dilemma
+const TIME_LIMIT = 25; // Increased to 25 seconds
+const TOTAL_DILEMMAS = 3;
 
 export function DecisionMaking({ onGameComplete }: { onGameComplete: (score: number) => void }) {
+  const [dilemmas, setDilemmas] = useState<DilemmaOutput[]>([]);
   const [currentDilemmaIndex, setCurrentDilemmaIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [totalScore, setTotalScore] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadDilemmas() {
+      try {
+        setIsLoading(true);
+        const newDilemmas = await Promise.all(
+          Array(TOTAL_DILEMMAS).fill(0).map(() => generateDilemma())
+        );
+        setDilemmas(newDilemmas);
+      } catch (e) {
+        setError('Failed to load new dilemmas. Please try refreshing the page.');
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadDilemmas();
+  }, []);
 
   const currentDilemma = dilemmas[currentDilemmaIndex];
   const progress = (timeLeft / TIME_LIMIT) * 100;
 
   useEffect(() => {
-    if (selectedOption) return;
+    if (isLoading || !currentDilemma || selectedOption) return;
 
     if (timeLeft <= 0) {
-      // Time's up, move to the next question with 0 points for this one.
       handleNextDilemma(0);
     }
 
@@ -59,38 +55,73 @@ export function DecisionMaking({ onGameComplete }: { onGameComplete: (score: num
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [timeLeft, selectedOption]);
+  }, [timeLeft, selectedOption, isLoading, currentDilemma]);
 
   const handleNextDilemma = (score: number) => {
-    setSelectedOption('locked'); // Lock selection
-    const finalScore = score + (timeLeft * 2); // Bonus points for speed
+    setSelectedOption('locked');
+    const finalScore = score + (timeLeft * 1.5); // Speed bonus
 
     setTimeout(() => {
       const newTotalScore = totalScore + finalScore;
       setTotalScore(newTotalScore);
 
-      if (currentDilemmaIndex < dilemmas.length - 1) {
+      if (currentDilemmaIndex < TOTAL_DILEMMAS - 1) {
         setCurrentDilemmaIndex(prev => prev + 1);
         setTimeLeft(TIME_LIMIT);
         setSelectedOption(null);
       } else {
-        onGameComplete(Math.round(newTotalScore / dilemmas.length));
+        onGameComplete(Math.round(newTotalScore / TOTAL_DILEMMAS));
       }
     }, 1500);
   };
   
   const handleOptionClick = (option: 'A' | 'B') => {
+    if (!currentDilemma) return;
     setSelectedOption(option);
     const score = option === 'A' ? currentDilemma.optionA.score : currentDilemma.optionB.score;
     handleNextDilemma(score);
   };
 
+  if (isLoading) {
+    return (
+        <div className="space-y-6 text-center">
+            <h3 className="text-xl font-headline font-semibold">Decision-Making Under Pressure</h3>
+            <Card className="text-left shadow-lg">
+                <CardHeader>
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-10 w-full mt-2" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-4 w-full" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                    </div>
+                    <div className="flex justify-center items-center pt-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <p className="ml-4 text-muted-foreground">Generating unique dilemmas...</p>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
+  }
+
+  if (error) {
+    return (
+        <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+        </Alert>
+    );
+  }
+
   return (
     <div className="space-y-6 text-center">
-        <h3 className="text-xl font-headline font-semibold">Decision-Making Under Pressure</h3>
-        <Card className="text-left shadow-lg">
+        <h3 className="text-xl font-headline font-semibold animate-fade-in-up">Decision-Making Under Pressure</h3>
+        <Card className="text-left shadow-lg animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <CardHeader>
-                <CardDescription>Dilemma {currentDilemmaIndex + 1} of {dilemmas.length}</CardDescription>
+                <CardDescription>Dilemma {currentDilemmaIndex + 1} of {TOTAL_DILEMMAS}</CardDescription>
                 <CardTitle>{currentDilemma.scenario}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

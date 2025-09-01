@@ -1,38 +1,44 @@
 'use client';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Lightbulb, TriangleAlert } from 'lucide-react';
+import { Lightbulb, TriangleAlert, Loader2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { generatePatternPuzzle, type PatternPuzzleOutput } from '@/ai/flows/generate-pattern-puzzle-flow';
 
-interface SequencePuzzle {
-  sequence: (number | string)[];
-  answer: number | string;
-  type: string;
-  explanation: string;
-}
-
-const puzzles: SequencePuzzle[] = [
-  { sequence: [1, 3, 6, 10, 15], answer: 21, type: "Triangular Numbers", explanation: "The pattern is adding +2, then +3, then +4, and so on." },
-  { sequence: [1, 2, 4, 8, 16], answer: 32, type: "Powers of 2", explanation: "Each number is multiplied by 2 to get the next number." },
-  { sequence: ['A', 'C', 'F', 'J', 'O'], answer: 'U', type: "Alphabetical Gap", explanation: "The gap between letters increases by one each time: +1, +2, +3, +4, +5." },
-  { sequence: [81, 27, 9, 3, 1], answer: '1/3', type: "Geometric Division", explanation: "Each number is divided by 3 to get the next one." },
-  { sequence: [5, 11, 23, 47, 95], answer: 191, type: "Multiply by 2, Add 1", explanation: "The pattern is (x * 2) + 1 for each number in the sequence." },
-];
-
-const TIME_LIMIT = 45; // Increased to 45 seconds
+const TIME_LIMIT = 50; // Increased to 50 seconds
 
 export function PatternRecognition({ onGameComplete }: { onGameComplete: (score: number) => void }) {
+  const [puzzle, setPuzzle] = useState<PatternPuzzleOutput | null>(null);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
-  const puzzle = useMemo(() => puzzles[Math.floor(Math.random() * puzzles.length)], []);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const progress = (timeLeft / TIME_LIMIT) * 100;
 
   useEffect(() => {
-    if (feedback) return;
+    async function loadPuzzle() {
+      try {
+        setIsLoading(true);
+        const newPuzzle = await generatePatternPuzzle();
+        setPuzzle(newPuzzle);
+      } catch (e) {
+        setError('Failed to load a new puzzle. Please try refreshing.');
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadPuzzle();
+  }, []);
+
+  useEffect(() => {
+    if (isLoading || feedback) return;
 
     if (timeLeft <= 0) {
       setFeedback('incorrect');
@@ -44,13 +50,12 @@ export function PatternRecognition({ onGameComplete }: { onGameComplete: (score:
       setTimeLeft(timeLeft - 1);
     }, 1000);
     return () => clearTimeout(timer);
-  }, [timeLeft, feedback, onGameComplete]);
+  }, [timeLeft, feedback, isLoading, onGameComplete]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (feedback) return;
+    if (feedback || !puzzle) return;
     
-    // Normalize answer for comparison
     const isCorrect = answer.trim().toLowerCase() === String(puzzle.answer).toLowerCase();
 
     if (isCorrect) {
@@ -63,8 +68,32 @@ export function PatternRecognition({ onGameComplete }: { onGameComplete: (score:
     }
   };
 
+  if (isLoading) {
+    return (
+        <div className="space-y-6 text-center">
+            <h3 className="text-xl font-headline font-semibold">Critical Thinking & Pattern Recognition</h3>
+            <Skeleton className="h-6 w-1/2 mx-auto" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-10 w-1/2 mx-auto" />
+            <div className="flex justify-center items-center pt-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="ml-4 text-muted-foreground">Generating a brain-bending puzzle...</p>
+            </div>
+        </div>
+    );
+  }
+
+  if (error || !puzzle) {
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error || "An unexpected error occurred."}</AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
-    <div className="space-y-6 text-center">
+    <div className="space-y-6 text-center animate-fade-in-up">
       <h3 className="text-xl font-headline font-semibold">Critical Thinking & Pattern Recognition</h3>
       <div className="w-full space-y-2">
         <p className="text-sm font-medium">Time Remaining: {timeLeft}s</p>
@@ -90,14 +119,14 @@ export function PatternRecognition({ onGameComplete }: { onGameComplete: (score:
         <Button type="submit" disabled={!!feedback}>Submit</Button>
       </form>
       {feedback === 'correct' && (
-        <Alert className="text-left border-green-500 bg-green-50 text-green-800">
+        <Alert className="text-left border-green-500 bg-green-50 text-green-800 animate-in fade-in-0 zoom-in-95">
           <Lightbulb className="h-4 w-4 text-green-500" />
           <AlertTitle>Correct!</AlertTitle>
           <AlertDescription>{puzzle.explanation}</AlertDescription>
         </Alert>
       )}
       {feedback === 'incorrect' && (
-        <Alert variant="destructive" className="text-left">
+        <Alert variant="destructive" className="text-left animate-in fade-in-0 zoom-in-95">
           <TriangleAlert className="h-4 w-4" />
           <AlertTitle>Incorrect</AlertTitle>
           <AlertDescription>The correct answer was {puzzle.answer}. {puzzle.explanation}</AlertDescription>
