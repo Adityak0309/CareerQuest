@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Lightbulb, RefreshCw, TriangleAlert, Loader2 } from 'lucide-react';
+import { Lightbulb, RefreshCw, TriangleAlert, Loader2, Check } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { generateInnovationChallenge, type InnovationChallengeOutput } from '@/ai/flows/generate-innovation-challenge-flow';
+import { cn } from '@/lib/utils';
 
 export function InnovationSimulation({ onGameComplete }: { onGameComplete: (score: number) => void }) {
   const [challenge, setChallenge] = useState<InnovationChallengeOutput | null>(null);
@@ -96,11 +97,16 @@ export function InnovationSimulation({ onGameComplete }: { onGameComplete: (scor
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <p className="font-semibold">Choose the most innovative and impactful initial solution:</p>
-                    <RadioGroup value={selectedSolution || ''} onValuechange={setSelectedSolution}>
+                    <RadioGroup value={selectedSolution || ''} onValueChange={setSelectedSolution} className="gap-3">
                         {challenge.solutions.map(solution => (
-                            <div key={solution.id} className="flex items-center space-x-2 p-3 rounded-md hover:bg-secondary/50 transition-colors">
-                                <RadioGroupItem value={solution.id} id={solution.id} />
-                                <Label htmlFor={solution.id} className="flex-1 cursor-pointer">{solution.text}</Label>
+                           <div key={solution.id} className={cn("flex items-center p-4 rounded-lg border-2 transition-all cursor-pointer", selectedSolution === solution.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50")}>
+                                <RadioGroupItem value={solution.id} id={solution.id} className="peer sr-only" />
+                                <Label htmlFor={solution.id} className="flex-1 cursor-pointer flex items-center gap-4 text-base">
+                                     <div className="h-6 w-6 rounded-full border-2 border-primary/50 flex items-center justify-center peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary text-primary-foreground transition-all">
+                                        <Check className={cn("h-4 w-4 opacity-0 scale-50 transition-all", selectedSolution === solution.id && "opacity-100 scale-100")} />
+                                     </div>
+                                    {solution.text}
+                                </Label>
                             </div>
                         ))}
                     </RadioGroup>
@@ -132,11 +138,16 @@ export function InnovationSimulation({ onGameComplete }: { onGameComplete: (scor
                 </CardHeader>
                 <CardContent className="space-y-4">
                      <p className="font-semibold">Based on the twist, select the best adaptation:</p>
-                    <RadioGroup value={selectedAdaptation || ''} onValuechange={setSelectedAdaptation}>
+                    <RadioGroup value={selectedAdaptation || ''} onValueChange={setSelectedAdaptation} className="gap-3">
                         {challenge.adaptations.map(adaptation => (
-                            <div key={adaptation.id} className="flex items-center space-x-2 p-3 rounded-md hover:bg-secondary/50 transition-colors">
-                                <RadioGroupItem value={adaptation.id} id={adaptation.id} />
-                                <Label htmlFor={adaptation.id} className="flex-1 cursor-pointer">{adaptation.text}</Label>
+                            <div key={adaptation.id} className={cn("flex items-center p-4 rounded-lg border-2 transition-all cursor-pointer", selectedAdaptation === adaptation.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50")}>
+                                <RadioGroupItem value={adaptation.id} id={adaptation.id} className="peer sr-only" />
+                                <Label htmlFor={adaptation.id} className="flex-1 cursor-pointer flex items-center gap-4 text-base">
+                                     <div className="h-6 w-6 rounded-full border-2 border-primary/50 flex items-center justify-center peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary text-primary-foreground transition-all">
+                                        <Check className={cn("h-4 w-4 opacity-0 scale-50 transition-all", selectedAdaptation === adaptation.id && "opacity-100 scale-100")} />
+                                     </div>
+                                    {adaptation.text}
+                                </Label>
                             </div>
                         ))}
                     </RadioGroup>

@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="en" className="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", fontBody.variable, fontHeadline.variable)}>
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 container py-8">{children}</main>
         <Footer />
         <Toaster />
       </body>
