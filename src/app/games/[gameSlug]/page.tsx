@@ -12,6 +12,12 @@ export default function GamePage({ params }: { params: { gameSlug: string } }) {
     notFound();
   }
 
+  // We can't pass the whole `game` object to GameForm because it contains the Icon component,
+  // which is not a plain object. Instead, we pass only the data GameForm needs.
+  const { slug, title, description, skill } = game;
+  const gameForForm = { slug, title, description, skill };
+
+
   return (
     <div className="flex justify-center">
       <Card className="w-full max-w-2xl shadow-xl">
@@ -29,7 +35,7 @@ export default function GamePage({ params }: { params: { gameSlug: string } }) {
             For this prototype, please rate your performance on a scale of 0 to 100.
           </p>
           <Suspense fallback={<div>Loading form...</div>}>
-            <GameForm game={game} />
+            <GameForm game={gameForForm} />
           </Suspense>
         </CardContent>
       </Card>

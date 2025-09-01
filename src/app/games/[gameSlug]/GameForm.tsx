@@ -1,6 +1,6 @@
 'use client';
 
-import type { Game, GameSlug } from '@/lib/gameData';
+import type { GameSlug } from '@/lib/gameData';
 import { gameSequence } from '@/lib/gameData';
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -9,7 +9,15 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Rocket } from 'lucide-react';
 
-export function GameForm({ game }: { game: Game }) {
+// We define a more specific type for the game prop that only includes serializable data.
+interface SerializableGame {
+  slug: GameSlug;
+  title: string;
+  description: string;
+  skill: string;
+}
+
+export function GameForm({ game }: { game: SerializableGame }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [score, setScore] = useState(50);
