@@ -7,18 +7,21 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Rocket } from 'lucide-react';
 
-import { LogicPuzzle } from './games/LogicPuzzle';
-import { MemoryGame } from './games/MemoryGame';
-import { CreativityChallenge } from './games/CreativityChallenge';
-import { ProblemSolving } from './games/ProblemSolving';
-import { ConfidencePitch } from './games/ConfidencePitch';
+import { StrategicProblemSolving } from './games/StrategicProblemSolving';
+import { PatternRecognition } from './games/PatternRecognition';
+import { DecisionMaking } from './games/DecisionMaking';
+import { InnovationSimulation } from './games/InnovationSimulation';
+import { MemoryChallenge } from './games/MemoryChallenge';
+import { SpatialAptitude } from './games/SpatialAptitude';
+
 
 const gameComponents: Record<GameSlug, React.ComponentType<{ onGameComplete: (score: number) => void }>> = {
-  'logic': LogicPuzzle,
-  'memory': MemoryGame,
-  'creativity': CreativityChallenge,
-  'problem-solving': ProblemSolving,
-  'confidence': ConfidencePitch,
+  'problem-solving': StrategicProblemSolving,
+  'analytical-thinking': PatternRecognition,
+  'decision-making': DecisionMaking,
+  'creativity': InnovationSimulation,
+  'memory': MemoryChallenge,
+  'spatial-aptitude': SpatialAptitude,
 };
 
 export function GameWrapper({ gameSlug }: { gameSlug: GameSlug }) {

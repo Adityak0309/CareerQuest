@@ -19,17 +19,30 @@ export function ResultsClient() {
 
   const skillProfile = useMemo(() => {
     const profile = {
-      analyticalThinking: Number(searchParams.get('logic') || 0),
-      memory: Number(searchParams.get('memory') || 0),
-      creativity: Number(searchParams.get('creativity') || 0),
+      analyticalThinking: Number(searchParams.get('analytical-thinking') || 0),
       problemSolving: Number(searchParams.get('problem-solving') || 0),
-      confidence: Number(searchParams.get('confidence') || 0),
+      decisionMaking: Number(searchParams.get('decision-making') || 0),
+      creativity: Number(searchParams.get('creativity') || 0),
+      memory: Number(searchParams.get('memory') || 0),
+      spatialAptitude: Number(searchParams.get('spatial-aptitude') || 0),
     };
     return profile;
   }, [searchParams]);
 
   useEffect(() => {
-    getCareerSuggestions(skillProfile)
+    // This is a temporary type assertion. In a real app, you would transform the data
+    // to match the expected input shape of the AI flow if they differ.
+    const flowInput = {
+        analyticalThinking: skillProfile.analyticalThinking,
+        problemSolving: skillProfile.problemSolving,
+        creativity: skillProfile.creativity,
+        // Mocking values for the AI flow that are not collected from new games.
+        // In a real scenario, you'd update the flow or collect this data.
+        memory: skillProfile.memory,
+        confidence: skillProfile.decisionMaking, 
+    };
+
+    getCareerSuggestions(flowInput)
       .then(response => {
         if (response.success && response.data) {
           setResults(response.data);
@@ -47,11 +60,12 @@ export function ResultsClient() {
   }, [skillProfile]);
 
   const chartData = [
-    { skill: 'Logic', value: skillProfile.analyticalThinking },
-    { skill: 'Memory', value: skillProfile.memory },
-    { skill: 'Creativity', value: skillProfile.creativity },
     { skill: 'Problem Solving', value: skillProfile.problemSolving },
-    { skill: 'Confidence', value: skillProfile.confidence },
+    { skill: 'Analytical', value: skillProfile.analyticalThinking },
+    { skill: 'Decision Making', value: skillProfile.decisionMaking },
+    { skill: 'Creativity', value: skillProfile.creativity },
+    { skill: 'Memory', value: skillProfile.memory },
+    { skill: 'Spatial', value: skillProfile.spatialAptitude },
   ];
 
   return (

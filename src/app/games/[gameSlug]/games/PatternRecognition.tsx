@@ -8,22 +8,23 @@ import { Lightbulb, TriangleAlert } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 interface SequencePuzzle {
-  sequence: number[];
-  answer: number;
+  sequence: (number | string)[];
+  answer: number | string;
   type: string;
+  explanation: string;
 }
 
 const puzzles: SequencePuzzle[] = [
-  { sequence: [2, 4, 6, 8], answer: 10, type: "Arithmetic Progression" },
-  { sequence: [3, 9, 27, 81], answer: 243, type: "Geometric Progression" },
-  { sequence: [1, 1, 2, 3, 5], answer: 8, type: "Fibonacci Sequence" },
-  { sequence: [1, 4, 9, 16], answer: 25, type: "Squared Numbers" },
-  { sequence: [10, 22, 34, 46], answer: 58, type: "Arithmetic Progression" },
+  { sequence: [1, 3, 6, 10, 15], answer: 21, type: "Triangular Numbers", explanation: "The pattern is adding +2, then +3, then +4, and so on." },
+  { sequence: [1, 2, 4, 8, 16], answer: 32, type: "Powers of 2", explanation: "Each number is multiplied by 2 to get the next number." },
+  { sequence: ['A', 'C', 'F', 'J', 'O'], answer: 'U', type: "Alphabetical Gap", explanation: "The gap between letters increases by one each time: +1, +2, +3, +4, +5." },
+  { sequence: [81, 27, 9, 3, 1], answer: 1/3, type: "Geometric Division", explanation: "Each number is divided by 3 to get the next one." },
+  { sequence: [5, 11, 23, 47, 95], answer: 191, type: "Multiply by 2, Add 1", explanation: "The pattern is (x * 2) + 1 for each number in the sequence." },
 ];
 
-const TIME_LIMIT = 25; // 25 seconds
+const TIME_LIMIT = 30; // 30 seconds
 
-export function LogicPuzzle({ onGameComplete }: { onGameComplete: (score: number) => void }) {
+export function PatternRecognition({ onGameComplete }: { onGameComplete: (score: number) => void }) {
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
@@ -48,7 +49,10 @@ export function LogicPuzzle({ onGameComplete }: { onGameComplete: (score: number
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (feedback) return;
-    const isCorrect = parseInt(answer, 10) === puzzle.answer;
+    
+    // Normalize answer for comparison
+    const isCorrect = answer.trim().toLowerCase() === String(puzzle.answer).toLowerCase();
+
     if (isCorrect) {
       setFeedback('correct');
       const score = Math.max(20, Math.round((timeLeft / TIME_LIMIT) * 100));
@@ -61,23 +65,24 @@ export function LogicPuzzle({ onGameComplete }: { onGameComplete: (score: number
 
   return (
     <div className="space-y-6 text-center">
+      <h3 className="text-xl font-headline font-semibold">Critical Thinking & Pattern Recognition</h3>
       <div className="w-full space-y-2">
         <p className="text-sm font-medium">Time Remaining</p>
         <Progress value={progress} />
       </div>
       <div>
-        <h3 className="font-semibold">What is the next number in this sequence?</h3>
-        <p className="text-2xl font-bold tracking-widest my-4">{puzzle.sequence.join(', ')}, ?</p>
+        <h3 className="font-semibold">Identify the trend and find the next element in the sequence:</h3>
+        <p className="text-2xl font-bold tracking-widest my-4 bg-secondary/50 p-4 rounded-lg">{puzzle.sequence.join(', ')}, ?</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid w-full max-w-sm items-center gap-1.5 mx-auto">
           <Label htmlFor="answer">Your Answer</Label>
           <Input 
             id="answer"
-            type="number"
+            type="text"
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            placeholder="Next number"
+            placeholder="Next in sequence"
             disabled={!!feedback}
             className="text-center"
           />
@@ -88,14 +93,14 @@ export function LogicPuzzle({ onGameComplete }: { onGameComplete: (score: number
         <Alert className="text-left">
           <Lightbulb className="h-4 w-4" />
           <AlertTitle>Correct!</AlertTitle>
-          <AlertDescription>Great job! The pattern was a {puzzle.type}.</AlertDescription>
+          <AlertDescription>{puzzle.explanation}</AlertDescription>
         </Alert>
       )}
       {feedback === 'incorrect' && (
         <Alert variant="destructive" className="text-left">
           <TriangleAlert className="h-4 w-4" />
-          <AlertTitle>Time's up or Incorrect!</AlertTitle>
-          <AlertDescription>The correct answer was {puzzle.answer}.</AlertDescription>
+          <AlertTitle>Incorrect</AlertTitle>
+          <AlertDescription>The correct answer was {puzzle.answer}. {puzzle.explanation}</AlertDescription>
         </Alert>
       )}
     </div>

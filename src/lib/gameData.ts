@@ -1,9 +1,21 @@
 import type { LucideProps } from 'lucide-react';
-import { BrainCircuit, MemoryStick, Brush, Puzzle, Mic } from 'lucide-react';
+import { BrainCircuit, Puzzle, Briefcase, Lightbulb, MemoryStick, Shapes } from 'lucide-react';
 
-export type GameSlug = 'logic' | 'memory' | 'creativity' | 'problem-solving' | 'confidence';
+export type GameSlug = 
+  | 'problem-solving' 
+  | 'analytical-thinking' 
+  | 'decision-making' 
+  | 'creativity' 
+  | 'memory' 
+  | 'spatial-aptitude';
 
-export type Skill = 'analyticalThinking' | 'memory' | 'creativity' | 'problemSolving' | 'confidence';
+export type Skill = 
+  | 'problemSolving'
+  | 'analyticalThinking'
+  | 'decisionMaking'
+  | 'creativity'
+  | 'memory'
+  | 'spatialAptitude';
 
 export interface Game {
   slug: GameSlug;
@@ -14,11 +26,48 @@ export interface Game {
 }
 
 export const games: Game[] = [
-  { slug: 'logic', title: 'Logic Puzzle', description: 'Test your analytical thinking.', skill: 'analyticalThinking', Icon: BrainCircuit },
-  { slug: 'memory', title: 'Memory Game', description: 'Challenge your sequence recall.', skill: 'memory', Icon: MemoryStick },
-  { slug: 'creativity', title: 'Creativity Challenge', description: 'Build a story or doodle.', skill: 'creativity', Icon: Brush },
-  { slug: 'problem-solving', title: 'Problem-Solving Puzzle', description: 'Solve an escape room style puzzle.', skill: 'problemSolving', Icon: Puzzle },
-  { slug: 'confidence', title: 'Confidence Pitch', description: 'Record a quick pitch.', skill: 'confidence', Icon: Mic },
+  { 
+    slug: 'problem-solving', 
+    title: 'Strategic Problem-Solving', 
+    description: 'Distribute resources to maximize profit in a startup simulation.', 
+    skill: 'problemSolving', 
+    Icon: Puzzle 
+  },
+  { 
+    slug: 'analytical-thinking', 
+    title: 'Critical Thinking', 
+    description: 'Identify trends and anomalies in complex data patterns.', 
+    skill: 'analyticalThinking', 
+    Icon: BrainCircuit 
+  },
+  { 
+    slug: 'decision-making', 
+    title: 'Decision-Making Under Pressure', 
+    description: 'Navigate timed workplace dilemmas to test your judgment.', 
+    skill: 'decisionMaking', 
+    Icon: Briefcase 
+  },
+  { 
+    slug: 'creativity', 
+    title: 'Innovation Simulation', 
+    description: 'Solve a problem and adapt your solution to a surprise twist.', 
+    skill: 'creativity', 
+    Icon: Lightbulb
+  },
+  { 
+    slug: 'memory', 
+    title: 'Memory & Focus Challenge', 
+    description: 'Recall key details from a business report shown briefly.', 
+    skill: 'memory', 
+    Icon: MemoryStick
+  },
+  {
+    slug: 'spatial-aptitude',
+    title: 'Spatial & Technical Aptitude',
+    description: 'Visualize and match complex 3D shapes and patterns.',
+    skill: 'spatialAptitude',
+    Icon: Shapes
+  }
 ];
 
 export const gameSequence: GameSlug[] = games.map(g => g.slug);
