@@ -11,7 +11,7 @@ import { z } from 'zod';
 const PatternPuzzleOutputSchema = z.object({
   sequence: z.array(z.union([z.string(), z.number()])).length(5).describe('A sequence of 5 numbers or letters with a clear logical pattern.'),
   answer: z.union([z.string(), z.number()]).describe('The next element in the sequence.'),
-  explanation: z.string().describe('A brief explanation of the pattern.'),
+  explanation: z.string().describe('A brief, simple explanation of the pattern.'),
 });
 
 export type PatternPuzzleOutput = z.infer<typeof PatternPuzzleOutputSchema>;
@@ -25,9 +25,9 @@ const prompt = ai.definePrompt({
   output: { schema: PatternPuzzleOutputSchema },
   prompt: `Generate a unique sequence puzzle for a pattern recognition game.
 The puzzle can be numerical or alphabetical.
-The pattern should be clever but solvable.
-Provide the sequence (5 items), the correct next answer, and a clear explanation of the logic.
-Avoid overly simple patterns like simple addition or multiplication. Think about alternating patterns, number series (like Fibonacci), or alphabetical jumps.
+The pattern should be clever but solvable, not excessively complex.
+Provide the sequence (5 items), the correct next answer, and a clear, concise explanation of the logic.
+Avoid overly simple patterns like simple addition. Think about alternating patterns, number series (like Fibonacci), or alphabetical jumps.
 Example: Sequence [5, 11, 23, 47, 95], Answer: 191, Explanation: "The pattern is (x * 2) + 1 for each number."
 `,
 });

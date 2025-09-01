@@ -9,7 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { generatePatternPuzzle, type PatternPuzzleOutput } from '@/ai/flows/generate-pattern-puzzle-flow';
 
-const TIME_LIMIT = 50; // Increased to 50 seconds
+const TIME_LIMIT = 60; // Increased to 60 seconds
 
 export function PatternRecognition({ onGameComplete }: { onGameComplete: (score: number) => void }) {
   const [puzzle, setPuzzle] = useState<PatternPuzzleOutput | null>(null);

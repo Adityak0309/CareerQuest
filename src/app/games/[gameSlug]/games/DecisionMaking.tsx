@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { generateDilemma, type DilemmaOutput } from '@/ai/flows/generate-dilemma-flow';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-const TIME_LIMIT = 25; // Increased to 25 seconds
+const TIME_LIMIT = 60; // Increased to 60 seconds
 const TOTAL_DILEMMAS = 3;
 
 export function DecisionMaking({ onGameComplete }: { onGameComplete: (score: number) => void }) {

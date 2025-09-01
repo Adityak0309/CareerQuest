@@ -9,8 +9,8 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const ReportItemSchema = z.object({
-  item: z.string().describe('The name of the metric or data point (e.g., "Q2 Revenue").'),
-  value: z.string().describe('The value for the metric (e.g., "$1.5M").'),
+  item: z.string().describe('The name of the metric or data point (e.g., "Q2 Revenue"). Keep it short.'),
+  value: z.string().describe('The value for the metric (e.g., "$1.5M"). Keep it simple.'),
 });
 
 const MemoryChallengeOutputSchema = z.object({
@@ -29,7 +29,7 @@ const prompt = ai.definePrompt({
   prompt: `Generate a set of 5 unique and realistic key-value pairs for a business memory game.
 The items should look like they came from a concise business report.
 Include a mix of financial data, percentages, project names, and other business metrics.
-Ensure the values are simple enough to be remembered after viewing for 15 seconds.
+Ensure the labels are short and the values are simple enough to be remembered after viewing for 15 seconds.
 Example items: "Project Phoenix Budget: $750,000", "Customer Satisfaction: 92%", "Server Uptime: 99.98%".
 `,
 });
