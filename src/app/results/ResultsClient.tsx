@@ -7,7 +7,7 @@ import { getCareerSuggestions } from './actions';
 import { RadarChart } from '@/components/RadarChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
+import { Terminal, Lightbulb } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { gameData } from '@/lib/gameData';
 
@@ -71,14 +71,14 @@ export function ResultsClient() {
   return (
     <div className="container py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold font-headline text-primary">Your Skill Profile</h1>
+        <h1 className="text-4xl md:text-5xl font-bold font-headline bg-clip-text text-transparent bg-gradient-to-br from-primary to-accent">Your Skill Profile</h1>
         <p className="mt-4 text-lg text-muted-foreground">Here's what we've discovered about your unique talents!</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-        <Card className="w-full shadow-lg">
+        <Card className="w-full shadow-2xl shadow-primary/10">
           <CardHeader>
-            <CardTitle className="font-headline text-center">Skills Radar</CardTitle>
+            <CardTitle className="font-headline text-center text-2xl">Skills Radar</CardTitle>
           </CardHeader>
           <CardContent>
             <RadarChart data={chartData} />
@@ -102,11 +102,14 @@ export function ResultsClient() {
             </Alert>
           )}
           {results?.suggestions.map((suggestion, index) => (
-            <Card key={index} className="bg-gradient-to-br from-card to-secondary/50 shadow-md">
-              <CardHeader>
+            <Card key={index} className="bg-gradient-to-br from-card to-secondary/30 shadow-lg border-l-4 border-accent transition-transform duration-300 hover:-translate-y-1">
+              <CardHeader className="flex flex-row items-center gap-4">
+                 <div className="p-3 bg-accent/10 rounded-full text-accent">
+                    <Lightbulb />
+                </div>
                 <CardTitle className="font-headline">{suggestion.careerPath}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pl-16">
                 <p className="text-muted-foreground">{suggestion.description}</p>
               </CardContent>
             </Card>

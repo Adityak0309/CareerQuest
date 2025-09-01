@@ -35,7 +35,7 @@ const dilemmas: Dilemma[] = [
   }
 ];
 
-const TIME_LIMIT = 15; // 15 seconds per dilemma
+const TIME_LIMIT = 20; // Increased to 20 seconds per dilemma
 
 export function DecisionMaking({ onGameComplete }: { onGameComplete: (score: number) => void }) {
   const [currentDilemmaIndex, setCurrentDilemmaIndex] = useState(0);
@@ -101,7 +101,7 @@ export function DecisionMaking({ onGameComplete }: { onGameComplete: (score: num
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Button 
                         variant="outline"
-                        className={cn("h-auto py-4 whitespace-normal", selectedOption === 'A' && 'bg-primary text-primary-foreground')}
+                        className={cn("h-auto py-4 whitespace-normal text-base transition-all duration-300 hover:shadow-lg hover:-translate-y-1", selectedOption === 'A' && 'bg-primary text-primary-foreground ring-4 ring-primary/30')}
                         onClick={() => handleOptionClick('A')}
                         disabled={!!selectedOption}
                     >
@@ -109,7 +109,7 @@ export function DecisionMaking({ onGameComplete }: { onGameComplete: (score: num
                     </Button>
                     <Button 
                         variant="outline"
-                        className={cn("h-auto py-4 whitespace-normal", selectedOption === 'B' && 'bg-primary text-primary-foreground')}
+                        className={cn("h-auto py-4 whitespace-normal text-base transition-all duration-300 hover:shadow-lg hover:-translate-y-1", selectedOption === 'B' && 'bg-primary text-primary-foreground ring-4 ring-primary/30')}
                         onClick={() => handleOptionClick('B')}
                         disabled={!!selectedOption}
                     >

@@ -20,7 +20,7 @@ const generateReport = (): ReportItem[] => {
   return shuffledItems.slice(0, 5).map((item, i) => ({ item, value: values[items.indexOf(item)] }));
 };
 
-const VIEW_TIME = 10; // 10 seconds to view the report
+const VIEW_TIME = 15; // Increased to 15 seconds to view the report
 
 export function MemoryChallenge({ onGameComplete }: { onGameComplete: (score: number) => void }) {
   const [gameState, setGameState] = useState<'viewing' | 'answering' | 'result'>('viewing');
@@ -108,8 +108,8 @@ export function MemoryChallenge({ onGameComplete }: { onGameComplete: (score: nu
                 <Button type="submit" disabled={!answer || !!feedback}>Submit Answer</Button>
             </form>
              {feedback === 'correct' && (
-                <Alert className="text-left mt-4">
-                <Lightbulb className="h-4 w-4" />
+                <Alert className="text-left mt-4 border-green-500 bg-green-50 text-green-800">
+                <Lightbulb className="h-4 w-4 text-green-500" />
                 <AlertTitle>Correct!</AlertTitle>
                 <AlertDescription>Excellent recall!</AlertDescription>
                 </Alert>
